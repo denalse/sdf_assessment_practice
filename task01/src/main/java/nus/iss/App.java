@@ -53,9 +53,8 @@ public class App {
 
             }
 
-            // System.out.println(csvList.toString());
-
             br.close();
+            
         } catch (Exception e) {
             e.printStackTrace();
         }

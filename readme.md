@@ -18,5 +18,5 @@ java -cp target\task01-1.0-SNAPSHOT.jar nus.iss.App mail.csv template.txt
 
 run task02:
 ```
-java -cp target\task02-1.0-SNAPSHOT.jar nus.iss.App
+java -cp target\task02-1.0-SNAPSHOT.jar nus.iss.Client localhost:80
 ```
