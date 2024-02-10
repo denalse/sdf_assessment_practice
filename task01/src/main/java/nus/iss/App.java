@@ -1,14 +1,11 @@
 package nus.iss;
 
 import java.io.BufferedReader;
+
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class App {
@@ -19,13 +16,11 @@ public class App {
             String csvFile = args[0]; // mail.csv
             String templateFile = args[1]; // template.txt
 
-            // System.out.println(">>>" + csvFile + "///" + templateFile);
-
             // load csv file
-            List<MailData> dataCSV = load(csvFile);
+            List<MailData> mailData = load(csvFile);
 
             // read and merge the template
-            mergeTemplate(dataCSV, templateFile);
+            mergeTemplate(mailData, templateFile);
 
         } catch (Exception e) {
             System.err.println("Error reading file! Please try again! ");
@@ -34,65 +29,76 @@ public class App {
 
     }
 
-    private static List<MailData> load(String csvFile) throws IOException {
+    private static List<MailData> load(String dataCSV) throws IOException {
 
         List<MailData> dataList = new ArrayList<>();
 
         try {
-            FileReader reader = new FileReader(csvFile);
+            FileReader reader = new FileReader(dataCSV);
             BufferedReader br = new BufferedReader(reader);
             String line = br.readLine();
 
             while ((line = br.readLine()) != null) {
                 String[] input = line.split(",");
-                MailData d = new MailData(
-                        input[0], input[1], input[2],
+                // System.out.println("input: "+Arrays.toString(input));
+
+                MailData data = new MailData(
+                        input[0],
+                        input[1],
+                        input[2],
+                        // in constructor is *int*, use this method to change)
                         Integer.parseInt(input[3]));
 
-                dataList.add(d);
-
+                dataList.add(data);
+                // System.out.println(dataList);
             }
-
             br.close();
-            
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return dataList;
     }
 
-    private static void mergeTemplate(List<MailData> dataList, String temp) throws IOException {
+    private static String readTemplate(String template) throws IOException {
+
+        StringBuilder sb = new StringBuilder();
+        BufferedReader br = new BufferedReader(new FileReader(template));
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+            br.close();
+        
+        return sb.toString();
+    }
+
+    private static void mergeTemplate(List<MailData> dataList, String template) throws IOException {
 
         try {
-            String tempData = readTemplate(temp);
+            String temp = readTemplate(template);
+            // System.out.println("temp: "+temp);
             
             for (MailData d : dataList) {
-                // String address
-                String newTemp = tempData;
-                newTemp = newTemp.replace("__address__", d.getAddress().replace("\\n", "\n") + "\n\n");
-                newTemp = newTemp.replace("__first_name__", d.getFirstName());
-                newTemp = newTemp.replace(",", "\n");
-                newTemp = newTemp.replace("__years__", String.valueOf(d.getYears()));
+                String temp_ = temp;
+                // Either formatAdress example works!!
+                // String formatAddress = d.getAddress().replaceAll("\\\\n", "\n");
+                String formatAddress = d.getAddress().replaceAll("\\\\n", System.lineSeparator());
+                temp_ = temp_.replace("__address__", formatAddress);
+                temp_ = temp_.replace("__first_name__", d.getFirstName());
+                temp_ = temp_.replace("__years__", String.valueOf(d.getYears()) + " years");
                 
-                System.out.println(newTemp);
-                System.out.println("________________________________________");
+                System.out.println(temp_);
+                System.out.println("-------------------------------------------------");
             }
+
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
-
-    private static String readTemplate(String mail_data) throws IOException {
-        Path path = Paths.get(mail_data);
-        List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
-        
-        StringBuilder sb = new StringBuilder();
-        for (String line : lines) {
-            sb.append(line);
-        }
-        return sb.toString();
-    }
-
 
 }
